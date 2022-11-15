@@ -3,17 +3,19 @@ from django.shortcuts import render
 # Create your views here.
 
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.http import Http404
-from .models import Player
+from .models import Player, SavedPlayers
 from .serializers import PlayerSerializer
 from rest_framework import status
-
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
 
 
 @api_view(['GET', 'POST', 'DELETE'])
-# The api retrives or creates the user when get is called, update the user name when post is called, also deletes the user when delete is called.
+# The api retrives or creates the player when get is called, update the player name when post is called, also deletes the player when delete is called.
 def User(request):
     if request.method == 'GET':
         try:
@@ -45,7 +47,7 @@ def User(request):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['GET', 'POST', 'DELETE'])
-# The api retreves all users when get is called, creates a new user when post is called, and deletes all users when delete is called.
+# The api retreves all players when get is called, creates a new player when post is called, and deletes all players when delete is called.
 def User_operations(request):
     try:
         if request.method == 'GET':
@@ -72,29 +74,51 @@ def User_operations(request):
 
 @api_view(['GET', 'POST', 'DELETE'])
 # the api get the saved players when it is called, create a a new saved player and add it to the list when post is called, and deletes a saved players when delete is called.
-def Saved_player_operations(request):
-    if request.method == 'GET':
-        try:
-            user = Player.objects.get(summoner_name=request.GET['summoner_name'])
-        except Player.DoesNotExist:
-            raise Http404
-        return Response(user.saved_players)
-    elif request.method == 'POST':
-        try:
-            user = Player.objects.get(summoner_name=request.GET['summoner_name'])
-        except Player.DoesNotExist:
-            raise Http404
-        user.saved_players.append(request.GET['saved_player'])
-        user.save()
-        return Response(user.saved_players, status=status.HTTP_201_CREATED)
-    elif request.method == 'DELETE':
-        try:
-            user = Player.objects.get(summoner_name=request.GET['summoner_name'])
-        except Player.DoesNotExist:
-            raise Http404
-        user.saved_players.remove(request.GET['saved_player'])
-        user.save()
-        return Response(user.saved_players, status=status.HTTP_204_NO_CONTENT)
+@permission_classes([IsAuthenticated])
+def SavedPlayers(request):
+    try:
+        if request.method == 'GET':
+            saved_players = SavedPlayers.objects.get(user=request.user)
+            return Response(saved_players.saved_players)
+        elif request.method == 'POST':
+            saved_players = SavedPlayers.objects.get(user=request.user)
+            saved_players.saved_players.append(request.data['summoner_name'])
+            saved_players.save()
+            return Response(saved_players.saved_players)
+        elif request.method == 'DELETE':
+            saved_players = SavedPlayers.objects.get(user=request.user)
+            saved_players.saved_players.remove(request.data['summoner_name'])
+            saved_players.save()
+            return Response(saved_players.saved_players)
+    except:
+        raise Http404
+
+
+# Token authentication
+@api_view(['POST'])
+def login(request):
+    username = request.data['username']
+    password = request.data['password']
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        token, created = Token.objects.get_or_create(user=user)
+        return Response(token.key)
+    else:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['POST'])
+def logout(request):
+    request.user.auth_token.delete()
+    return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_user(request):
+    if request.user.is_authenticated:
+        return Response(request.user.username)
+    else:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
 
 
         
