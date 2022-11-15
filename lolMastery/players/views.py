@@ -120,6 +120,27 @@ def get_user(request):
 
 
 
+# cadastra um novo usuario, recebendo o username e a senha
+@api_view(['POST'])
+def register(request):
+    username = request.data['username']
+    password = request.data['password']
+    user = Player.objects.create_user(username, password)
+    user.save()
+    return Response(status=status.HTTP_201_CREATED)
+
+# verifica se o usuario ja existe
+@api_view(['GET'])
+def check_user(request):
+    try:
+        user = Player.objects.get(username=request.GET['username'])
+        return Response(status=status.HTTP_208_ALREADY_REPORTED)
+    except Player.DoesNotExist:
+        return Response(status=status.HTTP_200_OK)
+
+
+
+
 
         
 
