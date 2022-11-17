@@ -12,11 +12,12 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
 
 
 @api_view(['GET', 'POST', 'DELETE'])
 # The api retrives or creates the player when get is called, update the player name when post is called, also deletes the player when delete is called.
-def User(request):
+def User_player(request):
     if request.method == 'GET':
         try:
             user = Player.objects.get(summoner_name=request.GET['summoner_name'])
@@ -136,7 +137,7 @@ def Get_user(request):
 def Register(request):
     username = request.data['username']
     password = request.data['password']
-    user = Player.objects.create_user(username, password)
+    user = User.objects.create_user(username=username, password=password)
     user.save()
     return Response(status=status.HTTP_201_CREATED)
 
