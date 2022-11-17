@@ -78,10 +78,21 @@ def User_operations(request):
 def Saved_player_operations(request):
     try:
         if request.method == 'GET':
-            saved_players = SavedPlayers.objects.get(user=request.user)
-            return Response(saved_players.saved_players)
+            try:
+                saved_players = SavedPlayers.objects.get(user=request.user)
+                return Response(saved_players.saved_players)
+            except:
+                #create a new saved player in the database
+                saved_players = SavedPlayers(saved_players=[], user=request.user)
+                saved_players.save()
+                return Response(saved_players.saved_players)
         elif request.method == 'POST':
-            saved_players = SavedPlayers.objects.get(user=request.user)
+            try:
+                saved_players = SavedPlayers.objects.get(user=request.user)
+            except:
+                #create a new saved player in the database
+                saved_players = SavedPlayers(saved_players=[], user=request.user)
+                saved_players.save()
             saved_players.saved_players.append(request.data['summoner_name'])
             saved_players.save()
             return Response(saved_players.saved_players)
