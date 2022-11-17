@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from .models import Player, SavedPlayers
 from .serializers import PlayerSerializer
 from rest_framework import status
@@ -101,8 +101,8 @@ def Login(request):
     password = request.data['password']
     user = authenticate(username=username, password=password)
     if user is not None:
-        token = Token.generate_key()
-        return Response(token)
+            token, created = Token.objects.get_or_create(user=user)
+            return JsonResponse({"token":token.key})
     else:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 

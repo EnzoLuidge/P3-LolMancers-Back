@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'players.apps.PlayersConfig',
     'rest_framework',
     'corsheaders',
+    'rest_framework.authtoken',
 
 ]
 
