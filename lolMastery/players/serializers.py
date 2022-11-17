@@ -4,7 +4,7 @@ from .models import Player, SavedPlayers
 class PlayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Player
-        fields = ('summoner_name', 'summoner_id', 'summoner_level', 'profile_icon_id', 'saved_players')
+        fields = ('summoner_name', 'summoner_id', 'summoner_level', 'profile_icon_id')
 
 class SavedPlayersSerializer(serializers.ModelSerializer):
     class Meta:

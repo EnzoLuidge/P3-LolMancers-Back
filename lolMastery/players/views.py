@@ -75,7 +75,7 @@ def User_operations(request):
 @api_view(['GET', 'POST', 'DELETE'])
 # the api get the saved players when it is called, create a a new saved player and add it to the list when post is called, and deletes a saved players when delete is called.
 @permission_classes([IsAuthenticated])
-def SavedPlayers(request):
+def Saved_player_operations(request):
     try:
         if request.method == 'GET':
             saved_players = SavedPlayers.objects.get(user=request.user)
@@ -96,23 +96,23 @@ def SavedPlayers(request):
 
 # Token authentication
 @api_view(['POST'])
-def login(request):
+def Login(request):
     username = request.data['username']
     password = request.data['password']
     user = authenticate(username=username, password=password)
     if user is not None:
-        token, created = Token.objects.get_or_create(user=user)
-        return Response(token.key)
+        token = Token.generate_key()
+        return Response(token)
     else:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['POST'])
-def logout(request):
+def Logout(request):
     request.user.auth_token.delete()
     return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-def get_user(request):
+def Get_user(request):
     if request.user.is_authenticated:
         return Response(request.user.username)
     else:
@@ -122,7 +122,7 @@ def get_user(request):
 
 # cadastra um novo usuario, recebendo o username e a senha
 @api_view(['POST'])
-def register(request):
+def Register(request):
     username = request.data['username']
     password = request.data['password']
     user = Player.objects.create_user(username, password)
@@ -131,7 +131,7 @@ def register(request):
 
 # verifica se o usuario ja existe
 @api_view(['GET'])
-def check_user(request):
+def Check_user(request):
     try:
         user = Player.objects.get(username=request.GET['username'])
         return Response(status=status.HTTP_208_ALREADY_REPORTED)

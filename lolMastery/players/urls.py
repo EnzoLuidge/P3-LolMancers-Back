@@ -10,4 +10,5 @@ urlpatterns = [
     path('api/login/', views.Login, name='Login'),
     path('api/logout/', views.Logout, name='Logout'),
     path('api/get_user/', views.Get_user, name='Get_user'),
+    path('api/register/', views.Register, name='Register'),
 ]
